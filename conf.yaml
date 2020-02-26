@@ -1,0 +1,32 @@
+shared:
+  general: &shared-general
+    graceful_shutdown_seconds: 10
+    port: 8080
+  database-hosts:
+    dd-titanium-database-ro:
+      development-env: &shared-development-dd-titanium-database-ro-host
+        host: localhost
+  databases:
+    dd-titanium-database-ro: &shared-dd-titanium-database-ro
+      max_idle_connections: 50
+      max_open_connections: 50
+      password: kacscorp
+      port: 5432
+      user: kenneth
+    titanium-schema: &shared-titanium-schema
+      name: titanium_development
+    development-dd-titanium-database-ro: &development-dd-titanium-database-ro
+      <<: *shared-dd-titanium-database-ro
+      <<: *shared-development-dd-titanium-database-ro-host
+
+# There aren't too many changes expected beyond this point unless there's a very
+# specific reason for having some environment behave different from the rest.
+# The most commonly expected changes are supposed to be covered in the lines
+# above this one.
+# So even though this file is long, it remains easy to maintain.
+
+<<: *shared-general
+databases:
+  titanium_database:
+    <<: *development-dd-titanium-database-ro
+    <<: *shared-titanium-schema
