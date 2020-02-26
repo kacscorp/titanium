@@ -6,7 +6,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/kacscorp/titanium/lib/config/db"
-	"github.com/zenazn/goji/web"
+	"github.com/kataras/muxie"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 func Run(config *Configuration) error {
 
 	// Dependency: Multiplexer
-	mux := web.New()
+	mux := muxie.NewMux()
 
 	// Dependency: Titanium Database connection
 	titaniumDB, err := connectToDB(config, "titanium_database")
