@@ -1,4 +1,4 @@
-package employees
+package user
 
 import (
 	"encoding/json"
@@ -7,9 +7,9 @@ import (
 	"strconv"
 
 	"github.com/jinzhu/gorm"
+	"github.com/kacscorp/oxygen/data/model"
 	"github.com/kacscorp/titanium/lib/config/handlers"
-	"github.com/kacscorp/titanium/lib/report"
-	"github.com/kacscorp/titanium/lib/sources/employees/v1/query"
+	"github.com/kacscorp/titanium/lib/sources/user/v1/query"
 )
 
 //Source ...
@@ -24,23 +24,32 @@ func NewSource(db *gorm.DB) *Source {
 	}
 }
 
-// SearchEmployeeByID takes an id object and search it on the database.
+// SearcUserByID takes an id object and search it on the database.
 // If an error occurs then it is returned with a nil Response.
-func (src Source) SearchEmployeeByID(id int64) (*report.Employee, error) {
-	qr, err := query.NewSelectEmployeesByID(id)
+func (src Source) SearcUserByID(id int64) (*model.User, error) {
+	qr, err := query.NewSelectUserByID(id)
 	if err != nil {
 		return nil, errors.New("error when building query")
 	}
 
-	output := query.Employees{}
+	output := query.User{}
 	src.db.Raw(qr.Query, qr.Args...).Scan(&output)
 
-	return &report.Employee{
-		ID:                   int64(output.ID),
-		IdentificationNumber: output.IdentificationNumber.String,
-		Age:                  int(output.Age.Int64),
-		FirstName:            output.FirstName.String,
-		LastName:             output.LastName.String,
+	isActive := model.Active
+	if output.IsActive == model.Inactive.String() {
+		isActive = model.Inactive
+	}
+
+	return &model.User{
+		UserID:   int(output.UserID),
+		Username: output.UserName,
+		CreatedAt: &model.Datetime{
+			Full: output.CreatedAt,
+		},
+		IsActive: isActive,
+		UserRole: model.UserRole{
+			UserRoleID: output.UserRoleID,
+		},
 	}, nil
 }
 
@@ -62,7 +71,7 @@ func GetHandler(ctx *handlers.AppContext, w http.ResponseWriter, r *http.Request
 	}
 
 	src := NewSource(ctx.DB)
-	response, err := src.SearchEmployeeByID(id)
+	response, err := src.SearcUserByID(id)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -75,7 +84,7 @@ func GetHandler(ctx *handlers.AppContext, w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	encoder := json.NewEncoder(w)
 	if err := encoder.Encode(response); err != nil {
-		return http.StatusInternalServerError, errors.New("failed to encode employee into the http.ResponseWriter")
+		return http.StatusInternalServerError, errors.New("failed to encode User into the http.ResponseWriter")
 	}
 
 	return http.StatusOK, nil

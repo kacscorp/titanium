@@ -6,7 +6,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/kacscorp/titanium/lib/config/handlers"
-	"github.com/kacscorp/titanium/lib/sources/employees/v1"
+	"github.com/kacscorp/titanium/lib/sources/user/v1"
 	"github.com/kataras/muxie"
 	"github.com/zenazn/goji/graceful"
 )
@@ -38,12 +38,12 @@ func newServer(
 func (sv *server) defineRoutes() {
 
 	context := &handlers.AppContext{DB: sv.titaniumDB}
-	//Titanium Employees endpoints
-	// Employee GET endpoint
-	if handler, err := handlers.NewUsingSourceHandler(context, employees.GetHandler); err != nil {
-		fmt.Errorf("Employee handler error")
+	//Titanium User endpoints
+	// User GET endpoint
+	if handler, err := handlers.NewUsingSourceHandler(context, user.GetHandler); err != nil {
+		fmt.Errorf("User handler error")
 	} else {
-		sv.mux.Handle("/employees", handler)
+		sv.mux.Handle("/user", handler)
 	}
 }
 
