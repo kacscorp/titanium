@@ -35,14 +35,14 @@ func (src Source) SearcUserByID(id int64) (*model.User, error) {
 	output := query.User{}
 	src.db.Raw(qr.Query, qr.Args...).Scan(&output)
 
-	isActive := model.Active
-	if output.IsActive == model.Inactive.String() {
-		isActive = model.Inactive
+	isActive := model.Inactive
+	if output.IsActive == model.Active.String() {
+		isActive = model.Active
 	}
 
 	return &model.User{
 		UserID:   int(output.UserID),
-		Username: output.UserName,
+		Username: output.Username,
 		CreatedAt: &model.Datetime{
 			Full: output.CreatedAt,
 		},
